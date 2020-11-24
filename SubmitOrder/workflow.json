@@ -1,0 +1,206 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "get-stock-details": {
+                "type": "Http",
+                "inputs": {
+                    "method": "get",
+                    "queries": {
+                        "['productId'])}": ""
+                    },
+                    "uri": "https://dpapi.azure-api.net/retaildiy/stock/@{encodeURIComponent(triggerBody()?['productId'])}"
+                },
+                "runAfter": {},
+                "metadata": {
+                    "apiDefinitionUrl": "https://integrationdemoretail.blob.core.windows.net/openapi/Order API Swagger.json",
+                    "swaggerSource": "custom"
+                }
+            },
+            "Create_Customer": {
+                "type": "ApiConnection",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "referenceName": "sql"
+                        }
+                    },
+                    "method": "post",
+                    "body": {
+                        "Address": "@triggerBody()?['customer']?['address']",
+                        "Email": "@triggerBody()?['customer']?['email']",
+                        "Mobile": "@triggerBody()?['customer']?['mobile']",
+                        "Name": "@triggerBody()?['customer']?['name']"
+                    },
+                    "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('default'))},@{encodeURIComponent(encodeURIComponent('default'))}/procedures/@{encodeURIComponent(encodeURIComponent('[dbo].[CreateCustomer]'))}"
+                },
+                "runAfter": {}
+            },
+            "Does_stock_exist": {
+                "type": "If",
+                "expression": {
+                    "and": [
+                        {
+                            "greater": [
+                                "@body('get-stock-details')?['stockLevel']",
+                                0
+                            ]
+                        }
+                    ]
+                },
+                "actions": {
+                    "Send_Order_Submitted_Message": {
+                        "type": "ServiceProvider",
+                        "inputs": {
+                            "parameters": {
+                                "entityName": "ordersubmitted",
+                                "message": {
+                                    "contentData": "{\n  \"customerId\" : @{body('Create_Customer')?['returncode']},\n  \"deliveryDate\" : \"@{body('get-delivery-date')?['deliveryDate']}\",\n  \"productName\" : \"@{triggerBody()?['productName']}\"\n}"
+                                }
+                            },
+                            "serviceProviderConfiguration": {
+                                "connectionName": "serviceBus",
+                                "operationId": "sendMessage",
+                                "serviceProviderId": "/serviceProviders/serviceBus"
+                            }
+                        },
+                        "runAfter": {
+                            "submit-order": [
+                                "Succeeded"
+                            ]
+                        }
+                    },
+                    "get-delivery-date": {
+                        "type": "Http",
+                        "inputs": {
+                            "method": "post",
+                            "body": {
+                                "address": "@triggerBody()?['customer']?['address']",
+                                "productId": "@triggerBody()?['productId']"
+                            },
+                            "uri": "https://dpapi.azure-api.net/retaildiy/delivery"
+                        },
+                        "runAfter": {},
+                        "metadata": {
+                            "apiDefinitionUrl": "https://integrationdemoretail.blob.core.windows.net/openapi/Order API Swagger.json",
+                            "swaggerSource": "custom"
+                        }
+                    },
+                    "submit-order": {
+                        "type": "Http",
+                        "inputs": {
+                            "method": "post",
+                            "body": {
+                                "productName": "@triggerBody()?['productName']",
+                                "productId": "@triggerBody()?['productId']",
+                                "quantity": "@triggerBody()?['quantity']",
+                                "customer": {
+                                    "name": "@triggerBody()?['customer']?['name']",
+                                    "address": "@triggerBody()?['customer']?['address']",
+                                    "mobile": "@triggerBody()?['customer']?['mobile']"
+                                }
+                            },
+                            "uri": "https://dpapi.azure-api.net/retaildiy/order"
+                        },
+                        "runAfter": {
+                            "get-delivery-date": [
+                                "Succeeded"
+                            ]
+                        },
+                        "metadata": {
+                            "apiDefinitionUrl": "https://integrationdemoretail.blob.core.windows.net/openapi/Order API Swagger.json",
+                            "swaggerSource": "custom"
+                        }
+                    }
+                },
+                "runAfter": {
+                    "get-stock-details": [
+                        "Succeeded"
+                    ],
+                    "Create_Customer": [
+                        "Succeeded"
+                    ]
+                },
+                "else": {
+                    "actions": {
+                        "Order_More_Stock": {
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "referenceName": "outlook"
+                                    }
+                                },
+                                "method": "post",
+                                "body": {
+                                    "To": "david.phelps@microsoft.com",
+                                    "Subject": "More Stock Required",
+                                    "Body": "<p>Please order more stock of @{triggerBody()?['productName']}</p>"
+                                },
+                                "path": "/v2/Mail"
+                            },
+                            "runAfter": {}
+                        }
+                    }
+                }
+            },
+            "Response": {
+                "type": "Response",
+                "kind": "http",
+                "inputs": {
+                    "statusCode": 200,
+                    "body": {
+                        "customerId": "@body('Create_Customer')?['returncode']"
+                    }
+                },
+                "runAfter": {
+                    "Does_stock_exist": [
+                        "Succeeded"
+                    ]
+                }
+            }
+        },
+        "triggers": {
+            "manual": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "productName": {
+                                "type": "string"
+                            },
+                            "productId": {
+                                "type": "string"
+                            },
+                            "quantity": {
+                                "type": "string"
+                            },
+                            "customer": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "address": {
+                                        "type": "string"
+                                    },
+                                    "mobile": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {}
+    },
+    "kind": "Stateful"
+}

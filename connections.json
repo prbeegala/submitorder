@@ -1,0 +1,43 @@
+{
+  "managedApiConnections": {
+    "sql": {
+      "api": {
+        "id": "/subscriptions/15abae6c-7021-4f45-a569-3801fc087656/providers/Microsoft.Web/locations/westeurope/managedApis/sql"
+      },
+      "connection": {
+        "id": "/subscriptions/15abae6c-7021-4f45-a569-3801fc087656/resourceGroups/integrationdemo/providers/Microsoft.Web/connections/sql"
+      },
+      "connectionRuntimeUrl": "https://85c1fc49a1373510.09.common.logic-westeurope.azure-apihub.net/apim/sql/88df9d389da54e77b9ae03b79f1ffbcc/",
+      "authentication": {
+        "type": "Raw",
+        "scheme": "Key",
+        "parameter": "@appsetting('sql-connectionKey')"
+      }
+    },
+    "outlook": {
+      "api": {
+        "id": "/subscriptions/15abae6c-7021-4f45-a569-3801fc087656/providers/Microsoft.Web/locations/westeurope/managedApis/outlook"
+      },
+      "connection": {
+        "id": "/subscriptions/15abae6c-7021-4f45-a569-3801fc087656/resourceGroups/integrationdemo/providers/Microsoft.Web/connections/outlook"
+      },
+      "connectionRuntimeUrl": "https://85c1fc49a1373510.09.common.logic-westeurope.azure-apihub.net/apim/outlook/50c5bb9dd7fa459ca26b487869c96754/",
+      "authentication": {
+        "type": "Raw",
+        "scheme": "Key",
+        "parameter": "@appsetting('outlook-connectionKey')"
+      }
+    }
+  },
+  "serviceProviderConnections": {
+    "serviceBus": {
+      "parameterValues": {
+        "connectionString": "@appsetting('serviceBus-connectionString')"
+      },
+      "serviceProvider": {
+        "id": "/serviceProviders/serviceBus"
+      },
+      "displayName": "sbconn"
+    }
+  }
+}

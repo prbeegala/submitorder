@@ -1,0 +1,29 @@
+# Action Requires
+# 1. Setup the AZURE_CREDENTIALS secrets in your GitHub Repository
+# 2. Setup the REGISTRY_USERNAME secrets in your GitHub Repository
+# 3. Setup the REGISTRY_PASSWORD secrets in your GitHub Repository
+# 4. Replace REGISTRY, NAMESPACE, IMAGE, TAG in the following template with proper values
+# 5. Add this yaml file to your project's .github/workflows/
+# 6. Push your local project to your GitHub Repository
+
+name: docker
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@master
+
+    - name: 'Login via Azure CLI'
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+        repository: pbeegala/submitorder
+        tags: latest

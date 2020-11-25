@@ -1,4 +1,4 @@
-name: Deploy DotNet project to Azure
+name: Deploy Contoso Submit Order to Azure
 
 on:
   [push]
@@ -34,7 +34,7 @@ jobs:
         dotnet build --configuration Release --output ./output
         popd
         
-    - name: 'Run Azure Functions Action'
+    - name: 'Deploy Workflow Action'
       uses: Azure/functions-action@v1
       id: fa
       with:

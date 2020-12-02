@@ -27,6 +27,20 @@
         "scheme": "Key",
         "parameter": "@appsetting('outlook-connectionKey')"
       }
+    },
+    "sql_1": {
+      "api": {
+        "id": "/subscriptions/52eb3891-6f09-4350-8707-4dc848cba302/providers/Microsoft.Web/locations/westeurope/managedApis/sql"
+      },
+      "connection": {
+        "id": "/subscriptions/52eb3891-6f09-4350-8707-4dc848cba302/resourceGroups/IntegrationDemo/providers/Microsoft.Web/connections/sql-5"
+      },
+      "connectionRuntimeUrl": "https://47e705ee2f46a8cd.12.common.logic-westeurope.azure-apihub.net/apim/sql/5f68952db6444bb0860c4b3d7408b52c/",
+      "authentication": {
+        "type": "Raw",
+        "scheme": "Key",
+        "parameter": "@appsetting('sql_1-connectionKey')"
+      }
     }
   },
   "serviceProviderConnections": {

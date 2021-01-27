@@ -5,7 +5,7 @@
 # 4. Replace REGISTRY, NAMESPACE, IMAGE, TAG in the following template with proper values
 # 5. Add this yaml file to your project's .github/workflows/
 # 6. Push your local project to your GitHub Repository
-
+#7. added a comment
 name: docker image submitorder
 
 on:
